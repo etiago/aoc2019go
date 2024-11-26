@@ -34,8 +34,6 @@ func (programState *ProgramState) extractInOutArgs() InOutArgs {
 	var out int
 	var hasOut bool
 
-	fmt.Println(opcode)
-
 	switch opcode {
 	case 1:
 		in = programState.extractArgs(2, modes)
