@@ -75,15 +75,19 @@ func (programState *ProgramState) ExecuteToHalt() {
 	}
 }
 
-func (programState *ProgramState) ExecuteToHaltAsync(in <-chan int, out chan<- int, wg *sync.WaitGroup) {
+func (programState *ProgramState) ExecuteToHaltAsync(computer_id int, in <-chan int, out chan<- int, wg *sync.WaitGroup, out_final *chan int) {
 	defer wg.Done()
 
 	for !programState.isHalted() {
-		programState.executeInstructionWithChannels(in, out)
+		programState.executeInstructionWithChannels(computer_id, in, out, out_final)
+	}
+
+	if out_final != nil {
+		*out_final <- programState.last_output
 	}
 }
 
-func (programState *ProgramState) executeInstructionWithChannels(in <-chan int, out chan<- int) {
+func (programState *ProgramState) executeInstructionWithChannels(computer_id int, in <-chan int, out chan<- int, out_final *chan int) {
 	instruction := programState.memory[programState.instructionPointer]
 	opcode := instruction % 100
 
@@ -208,13 +212,18 @@ func (programState *ProgramState) input(inOutArgs *InOutArgs) {
 }
 
 func (programState *ProgramState) inputFromChannel(inOutArgs *InOutArgs, in <-chan int) {
-	input := <-in
+	input, ok := <-in
+	if !ok {
+		programState.halted = true
+		return
+	}
 	programState.memory[inOutArgs.out] = input
 	programState.instructionPointer += 2
 }
 
 func (programState *ProgramState) outputToChannel(inOutArgs *InOutArgs, out chan<- int) {
 	output := inOutArgs.in[0]
+	programState.last_output = output
 	out <- output
 	programState.instructionPointer += 2
 }
@@ -226,5 +235,5 @@ func (programState *ProgramState) output(inOutArgs *InOutArgs) {
 }
 
 func (programState *ProgramState) isHalted() bool {
-	return programState.memory[programState.instructionPointer] == 99
+	return programState.halted || programState.memory[programState.instructionPointer] == 99
 }

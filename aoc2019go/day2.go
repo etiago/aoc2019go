@@ -14,7 +14,7 @@ func Day2() string {
 	instructions[2] = 2
 
 	halted := false
-	programState := ProgramState{instructions, 0}
+	programState := ProgramState{0, instructions, 0, false, -1}
 
 	for !halted {
 		programState.executeInstruction()
@@ -32,7 +32,7 @@ func Day2() string {
 
 			halted = false
 
-			programState = ProgramState{instructions, 0}
+			programState = ProgramState{0, instructions, 0, false, -1}
 
 			for !halted {
 				programState.executeInstruction()

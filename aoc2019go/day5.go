@@ -8,13 +8,13 @@ func Day5() string {
 	copy(instructions, original_instructions)
 
 	// Part 1
-	programState := ProgramState{instructions, 0}
+	programState := ProgramState{0, instructions, 0, false, -1}
 
 	programState.ExecuteToHalt()
 
 	// Part 2
 	copy(instructions, original_instructions)
-	programState = ProgramState{instructions, 0}
+	programState = ProgramState{0, instructions, 0, false, -1}
 
 	programState.ExecuteToHalt()
 
